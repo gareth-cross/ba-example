@@ -161,11 +161,6 @@ for j=1:NPOSES
     cam_pose_estimates(:,:,j) = [wRb' -wRb'*p; 0 0 0 1];
 end
 
-% translation vectors
-p1 = p_cams_estimate(:,:,1);
-pN = p_cams_estimate(:,:,NPOSES);
-dist_1N = norm(p1 - pN);    % fix distance
-
 % run bundle adjustment
 NUM_ITERATIONS = 20;
 
