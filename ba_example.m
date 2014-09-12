@@ -88,7 +88,7 @@ points_image_noisy(3,:,:) = 1;
 FOCAL_LENGTH = 500;
 IMAGE_NOISE_STD = 0.3 / FOCAL_LENGTH;
 
-OUTLIER_PROB = 0.00;    % probability of a _bad_ outlier
+OUTLIER_PROB = 0.1;    % probability of a _bad_ outlier
 OUTLIER_IMAGE_NOISE_STD = 30 / FOCAL_LENGTH;
 
 % binomial distribution on outliers
@@ -162,7 +162,7 @@ for j=1:NPOSES
 end
 
 % run bundle adjustment
-NUM_ITERATIONS = 20;
+NUM_ITERATIONS = 10;
 
 % we will optimize only the poses from START_POSE to NPOSES (inclusive)
 START_POSE = 3;
@@ -222,9 +222,15 @@ for iter=1:NUM_ITERATIONS
     
     fprintf('Iter %i, magnitude %f\n', iter, norm(r));
     
+    % calculate cauchy weights
+    r2 = r.*r;
+    sigsqrd = mean(r2);
+    W = 1 ./ (1 + r2/sigsqrd);
+    W = diag(W);
+    
     % calculate update (slow and simple method)
-    H = J' * J;
-    dx = H\(J' * r);
+    H = J' * W * J;
+    dx = H\(J' * W * r);
     
     % update points
     dx_points = dx(1:(NPTS*3),:);
